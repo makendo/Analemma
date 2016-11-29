@@ -35,7 +35,12 @@ int firsts[] = {1, 32, 61, 92, 122, 153, 183, 214, 245, 275, 306, 336}; // first
 int solstices[] = {194, 356};
 int equinoxes[] = {80, 266};
 
+// sunrise vars
+uint8_t riseness = 0;
+int rise_k = 4;
+
 void setup() {
+  Serial.begin(9600);
   delay(500); // half second delay for recovery
 
   pinMode(DATA_PIN, OUTPUT);  // 
@@ -55,7 +60,9 @@ void loop()
 
   // write current mode pattern to leds array
   if (mode == 0) stepStatic();
-  if (mode == 1) stepRainbow();
+  if (mode == 1) stepSunrise();
+  if (mode == 2) stepSunset();
+  if (mode == 3) stepRainbow();
 
   // send the 'leds' array out to the actual LED strip
   FastLED.show();  
@@ -110,6 +117,31 @@ void stepStatic() {
 
   // set today to white
   leds[day_of_year % num_leds] = CRGB(255, 255, 127); // white
+}
+
+// 
+void stepSunrise() {
+  //Serial.println("\nstepping");
+  riseness++;
+  //Serial.println(riseness);
+  int pivot = day_of_year % num_leds;
+  leds[pivot] = CRGB(riseness, 0, 0);
+  int left_p = pivot;
+  int right_p = pivot;
+  for (int d = 0; d < num_leds/2; d++) {
+    int y = riseness >> (d - min(d, (riseness/rise_k)));
+    //Serial.println(y);
+    left_p--;
+    if (left_p < 0) left_p = num_leds - 1;
+    right_p++;
+    if (right_p >= num_leds) right_p = 0;
+    leds[left_p] = CRGB(y, 0, 0);
+    leds[right_p] = CRGB(y, 0, 0);
+  }
+}
+
+void stepSunset() {
+  
 }
 
 void rainbow() 
