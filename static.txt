@@ -1,0 +1,18 @@
+Jan 1 		1	r
+Feb 1		32	r
+Mar 1		61	r
+Equinox		80	g
+Apr 1		92	r
+May 1		122	r
+Jun 1		153	r
+Solstice		194	b
+Jul 1		183	r
+Aug 1		214	r
+Sep 1		245	r
+Equinox		266	g
+Oct 1		275	r
+Nov 1		306	r
+Dec 1		336	r
+Today		337	white
+Solstice		356	b
+All others: yellow
