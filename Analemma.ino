@@ -22,7 +22,7 @@ int num_modes = 4;
 
 int min_brightness = 0;
 int max_brightness = 255;
-int brightness = 100;  // ***master brightness dial***
+int brightness = 255;  // ***master brightness dial***
 int brightness_step = -5;
 
 // unsigned 8 bit int will count from 0 to 255 and overflow back to 0
@@ -36,8 +36,24 @@ int solstices[] = {194, 356};
 int equinoxes[] = {80, 266};
 
 // sunrise vars
-uint8_t riseness = 0;
-int rise_k = 4;
+int riseness = 0;
+int rise_k = 10; // bigger -> tighter sunrise spread
+int max_rise = 500;
+int rise_reds[] = {0, 127, 180, 255};
+int rise_greens[] = {0, 0, 127, 255};
+int rise_steps = 4;
+
+// interpolate rise to an rgb color
+CRGB lerpRise(int y) {
+  int lerp_step = max_rise / (rise_steps - 1);
+  int r_step = y / lerp_step;
+  if (r_step >= (rise_steps - 1)) {
+    return CRGB(rise_reds[rise_steps - 1], rise_greens[rise_steps - 1], 0);
+  }
+  int r_red = map(y % lerp_step, 0, lerp_step, rise_reds[r_step], rise_reds[r_step+1]);
+  int r_green = map(y % lerp_step, 0, lerp_step, rise_greens[r_step], rise_greens[r_step+1]);
+  return CRGB(r_red, r_green, 0);
+}
 
 void setup() {
   Serial.begin(9600);
@@ -122,10 +138,11 @@ void stepStatic() {
 // 
 void stepSunrise() {
   //Serial.println("\nstepping");
-  riseness++;
+  if (riseness < (max_rise << 2)) riseness++;
+  
   //Serial.println(riseness);
   int pivot = day_of_year % num_leds;
-  leds[pivot] = CRGB(riseness, 0, 0);
+  leds[pivot] = lerpRise(riseness);
   int left_p = pivot;
   int right_p = pivot;
   for (int d = 0; d < num_leds/2; d++) {
@@ -135,8 +152,7 @@ void stepSunrise() {
     if (left_p < 0) left_p = num_leds - 1;
     right_p++;
     if (right_p >= num_leds) right_p = 0;
-    leds[left_p] = CRGB(y, 0, 0);
-    leds[right_p] = CRGB(y, 0, 0);
+    leds[left_p] = leds[right_p] = lerpRise(y);
   }
 }
 
