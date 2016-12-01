@@ -39,9 +39,10 @@ int equinoxes[] = {80, 266};
 int riseness = 0;
 int rise_k = 4; // bigger -> tighter sunrise spread
 int max_rise = 500;
-int rise_reds[] = {0, 127, 180, 255};
-int rise_greens[] = {0, 0, 127, 255};
-int rise_steps = 4; // number of colors in rise reds & greens
+int rise_reds[] = {0, 31, 127, 180, 255};
+int rise_greens[] = {0, 0, 0, 127, 255};
+int rise_blues[] = {0, 31, 0, 0, 0};
+int rise_steps = 5; // number of colors in rise reds & greens
 
 // interpolate rise to an rgb color
 CRGB lerpRise(int y) {
@@ -52,7 +53,8 @@ CRGB lerpRise(int y) {
   }
   int r_red = map(y % lerp_step, 0, lerp_step, rise_reds[r_step], rise_reds[r_step+1]);
   int r_green = map(y % lerp_step, 0, lerp_step, rise_greens[r_step], rise_greens[r_step+1]);
-  return CRGB(r_red, r_green, 0);
+  int r_blue = map(y % lerp_step, 0, lerp_step, rise_blues[r_step], rise_blues[r_step+1]);
+  return CRGB(r_red, r_green, r_blue);
 }
 
 void setup() {
@@ -138,7 +140,7 @@ void stepStatic() {
 // 
 void stepSunrise() {
   //Serial.println("\nstepping");
-  if (riseness < max_rise) { // count up to twice max rise
+  if (riseness < (max_rise + 200)) { // count up to twice max rise
     riseness++;
     renderSun();
   }
@@ -158,7 +160,7 @@ void renderSun() {
   int left_p = pivot;
   int right_p = pivot;
   for (int d = 0; d < num_leds/2; d++) {
-    int y = max(0, riseness - (d >> 1));
+    int y = max(0, riseness - (d << 1));
     //Serial.println(y);
     left_p--;
     if (left_p < 0) left_p = num_leds - 1;
