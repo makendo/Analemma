@@ -18,7 +18,7 @@ int button_pin = 7; // set to 7 for button to switch modes
 //int button_pin = -1; // set to -1 to ignore button
 int debounceMS = 100; //-- Debounce for button
 int mode = 0; // modes: 0 -> static, 1 -> ?, 2 -> ?, 3 -> rainbow
-int num_modes = 4;
+int num_modes = 5;
 
 int min_brightness = 0;
 int max_brightness = 255;
@@ -41,7 +41,7 @@ int rise_k = 4; // bigger -> tighter sunrise spread
 int max_rise = 500;
 int rise_reds[] = {0, 31, 127, 180, 255};
 int rise_greens[] = {0, 0, 0, 127, 255};
-int rise_blues[] = {0, 31, 0, 0, 0};
+int rise_blues[] = {0, 15, 0, 0, 0};
 int rise_steps = 5; // number of colors in rise reds & greens
 
 // interpolate rise to an rgb color
@@ -81,12 +81,16 @@ void loop()
   if (mode == 1) stepSunrise();
   if (mode == 2) stepSunset();
   if (mode == 3) stepRainbow();
+  if (mode == 4) stepDark();
+
+  // set today to white
+  if (mode != 4) leds[day_of_year % num_leds] = CRGB(255, 255, 127); // white
 
   // send the 'leds' array out to the actual LED strip
   FastLED.show();  
   
   // insert a delay to keep the framerate modest
-  FastLED.delay(1000/frames_per_second); 
+  //FastLED.delay(1000/frames_per_second); 
 
   EVERY_N_MILLISECONDS( 20 ) { rainbow_hue++; } // slowly cycle the "base color" through the rainbow
 }
@@ -110,11 +114,17 @@ void checkButton() {
    }
 }
 
+void stepDark() {
+  for (int i = 0; i < num_leds; i++) {
+    leds[i] = CRGB(0, 0, 0); // black
+  }
+}
+
 void stepStatic() {
   
   // set all leds to yellow
   for (int i = 0; i < num_leds; i++) {
-    leds[i] = CRGB( 15, 15, 0); // yellow
+    leds[i] = CRGB(15, 15, 0); // yellow
   }
 
   // set firsts to red
@@ -132,9 +142,6 @@ void stepStatic() {
   for (int i = 0; i < 2; i++) {
     leds[equinoxes[i] % num_leds] = CRGB(0, 255, 0); // green
   }
-
-  // set today to white
-  leds[day_of_year % num_leds] = CRGB(255, 255, 127); // white
 }
 
 // 
