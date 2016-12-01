@@ -5,19 +5,19 @@ FASTLED_USING_NAMESPACE
 #define DATA_PIN    4
 #define LED_TYPE    WS2811
 #define COLOR_ORDER RGB
-#define NUM_LEDS    100
+#define NUM_LEDS    364
 CRGB leds[NUM_LEDS];
 
 int num_leds = NUM_LEDS;
-int day_of_year = 315; // change to todays date
+int day_of_year = 337; // change to todays date
 
 int frames_per_second = 120;
 
 //-- switch setup
-// int button_pin = 7; // set to 7 for button to switch modes
-int button_pin = -1; // set to -1 to ignore button
+int button_pin = 7; // set to 7 for button to switch modes
+//int button_pin = -1; // set to -1 to ignore button
 int debounceMS = 100; //-- Debounce for button
-int mode = 1; // modes: 0 -> static, 1 -> ?, 2 -> ?, 3 -> rainbow
+int mode = 0; // modes: 0 -> static, 1 -> ?, 2 -> ?, 3 -> rainbow
 int num_modes = 4;
 
 int min_brightness = 0;
@@ -37,11 +37,11 @@ int equinoxes[] = {80, 266};
 
 // sunrise vars
 int riseness = 0;
-int rise_k = 10; // bigger -> tighter sunrise spread
+int rise_k = 4; // bigger -> tighter sunrise spread
 int max_rise = 500;
 int rise_reds[] = {0, 127, 180, 255};
 int rise_greens[] = {0, 0, 127, 255};
-int rise_steps = 4;
+int rise_steps = 4; // number of colors in rise reds & greens
 
 // interpolate rise to an rgb color
 CRGB lerpRise(int y) {
@@ -112,7 +112,7 @@ void stepStatic() {
   
   // set all leds to yellow
   for (int i = 0; i < num_leds; i++) {
-    leds[i] = CRGB( 255, 255, 0); // yellow
+    leds[i] = CRGB( 15, 15, 0); // yellow
   }
 
   // set firsts to red
@@ -138,8 +138,20 @@ void stepStatic() {
 // 
 void stepSunrise() {
   //Serial.println("\nstepping");
-  if (riseness < (max_rise << 2)) riseness++;
-  
+  if (riseness < max_rise) {
+    riseness++;
+    renderSun();
+  }
+}
+
+void stepSunset() {
+  if (riseness > 0) {
+    riseness--;
+    renderSun();
+  }
+}
+
+void renderSun() {
   //Serial.println(riseness);
   int pivot = day_of_year % num_leds;
   leds[pivot] = lerpRise(riseness);
@@ -156,9 +168,6 @@ void stepSunrise() {
   }
 }
 
-void stepSunset() {
-  
-}
 
 void rainbow() 
 {
