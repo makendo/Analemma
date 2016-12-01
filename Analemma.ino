@@ -32,7 +32,7 @@ uint8_t rainbow_hue = 0;
 // static leds to light
 int num_firsts = 12;
 int firsts[] = {1, 32, 61, 92, 122, 153, 183, 214, 245, 275, 306, 336}; // firsts of each month should be red
-int solstices[] = {194, 356};
+int solstices[] = {171, 355};
 int equinoxes[] = {80, 266};
 
 // sunrise vars
@@ -84,7 +84,7 @@ void loop()
   if (mode == 4) stepDark();
 
   // set today to white
-  if (mode != 4) leds[day_of_year % num_leds] = CRGB(255, 255, 127); // white
+  if (mode != 4) leds[get_day(day_of_year)] = CRGB(255, 255, 127); // white
 
   // send the 'leds' array out to the actual LED strip
   FastLED.show();  
@@ -93,6 +93,12 @@ void loop()
   //FastLED.delay(1000/frames_per_second); 
 
   EVERY_N_MILLISECONDS( 20 ) { rainbow_hue++; } // slowly cycle the "base color" through the rainbow
+}
+
+int get_day(int day) {
+  day = day - 2;
+  if (day < 0) day = 364 + day;
+  return day % num_leds;
 }
 
 void checkButton() {
@@ -130,17 +136,17 @@ void stepStatic() {
   // set firsts to red
   for (int i = 0; i < num_firsts; i++) {
     // firsts[i] % num leds -> wrap around if this first is bigger than num_leds
-    leds[firsts[i] % num_leds] = CRGB(255, 0, 0); // red
+    leds[get_day(firsts[i])] = CRGB(255, 0, 0); // red
   }
 
   // set solstices to blue
   for (int i = 0; i < 2; i++) {
-    leds[solstices[i] % num_leds] = CRGB(0, 0, 255); // blue
+    leds[get_day(solstices[i])] = CRGB(0, 0, 255); // blue
   }  
 
   // set equinoxes to green
   for (int i = 0; i < 2; i++) {
-    leds[equinoxes[i] % num_leds] = CRGB(0, 255, 0); // green
+    leds[get_day(equinoxes[i])] = CRGB(0, 255, 0); // green
   }
 }
 
