@@ -138,7 +138,7 @@ void stepStatic() {
 // 
 void stepSunrise() {
   //Serial.println("\nstepping");
-  if (riseness < max_rise) {
+  if (riseness < max_rise) { // count up to twice max rise
     riseness++;
     renderSun();
   }
@@ -158,7 +158,7 @@ void renderSun() {
   int left_p = pivot;
   int right_p = pivot;
   for (int d = 0; d < num_leds/2; d++) {
-    int y = riseness >> (d - min(d, (riseness/rise_k)));
+    int y = max(0, riseness - (d >> 1));
     //Serial.println(y);
     left_p--;
     if (left_p < 0) left_p = num_leds - 1;
