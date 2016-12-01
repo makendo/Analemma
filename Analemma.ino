@@ -116,6 +116,7 @@ void checkButton() {
        mode++;
        if (mode >= num_modes) {
         mode = 0;
+        riseness = 0; // reset sunrise
        }
    }
 }
